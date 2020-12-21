@@ -73,16 +73,25 @@ contract SCFPrototype {
   + Financial Implementations +
   ///////////////////////////*/
 
-  function pay();
-  // pay off debt
+  function pay(uint _amount) public {
+    require (_amount <= userDebt[msg.sender], "MVP::pay: total debt < payment");
+    uint _currentDebt = userDebt[msg.sender];
+    approve(msg.sender, _amount);
+    transferFrom(msg.sender, address(this), _amount);
+    userDebt[msg.sender] = _currentDebt - _amount;
+  }
 
-  function liquify();
-  // provide funding
+  function liquify(uint _amount) public {
+    uint currentProvision = provision[msg.sender];
+    approve(msg.sender, address(this), _amount);
+    transferFrom(msg.sender, address(this), _amount);
+    provision[msg.sender] = currentProvision + _amount;
+  }
 
-  function claim();
-  // claim your share of fees generated
-
-
-
-
+  function claim() public {
+    uint _claim = userCredit[msg.sender];
+    userCredit[msg.sender] = 0;
+    approve(address(this), _claim);
+    transfer(msg.sender, _claim);
+  }
 }
